@@ -1,10 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Abstractions;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
-
-namespace BingoAI.Server
+﻿namespace BingoAI.Server
 {
     public class Program
     {
@@ -13,18 +7,30 @@ namespace BingoAI.Server
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
             builder.Services.AddControllers();
+            
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Add CORS policy for Angular app
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularApp",
+                    policy =>
+                    {
+                        policy.WithOrigins("https://localhost:59641", "http://localhost:4200")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
+                    });
+            });
+
             var app = builder.Build();
 
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
+            // Disable SPA proxy in development (launch Angular manually)
+            // app.UseDefaultFiles();
+            // app.UseStaticFiles();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -35,12 +41,14 @@ namespace BingoAI.Server
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            app.UseCors("AllowAngularApp");
 
+            app.UseAuthorization();
 
             app.MapControllers();
 
-            app.MapFallbackToFile("/index.html");
+            // Disable fallback to index.html when Angular runs separately
+            //app.MapFallbackToFile("/index.html");
 
             app.Run();
         }
