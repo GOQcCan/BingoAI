@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -20,12 +20,15 @@ import { googleConfig } from './auth-config';
   ],
   imports: [
     BrowserModule,
-    HttpClientModule,
     AppRoutingModule,
     SocialLoginModule,
     GoogleSigninButtonModule
   ],
   providers: [
+    // ✅ Angular 19+ : Nouvelle API HttpClient
+    provideHttpClient(
+      withInterceptorsFromDi() // Support pour les anciens interceptors si nécessaire
+    ),
     {
       provide: 'SocialAuthServiceConfig',
       useValue: {

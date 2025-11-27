@@ -5,13 +5,20 @@
     <!-- User logged in -->
     <div class="auth-section" *ngIf="authService.isLoggedIn()">
       <div class="user-info">
-        <img [src]="authService.getUserPhotoUrl()" alt="Profile" class="user-avatar" *ngIf="authService.getUserPhotoUrl()">
+        <img [src]="authService.getUserPhotoUrl()" 
+             [alt]="authService.getUserName() + ' profile picture'" 
+             class="user-avatar" 
+             *ngIf="authService.getUserPhotoUrl()">
         <div class="user-details">
           <span class="user-name">{{ authService.getUserName() }}</span>
           <span class="user-email">{{ authService.getUserEmail() }}</span>
         </div>
       </div>
-      <button (click)="logout()" class="btn btn-logout">Logout</button>
+      <button (click)="logout()" 
+              class="btn btn-logout"
+              aria-label="Sign out from your account">
+        Logout
+      </button>
     </div>
     
     <!-- User not logged in -->
@@ -29,17 +36,20 @@
     <h2 id="tableLabel">Weather forecast</h2>
     <p>This component demonstrates fetching data from the server with Google authentication.</p>
 
-    <div *ngIf="error" class="error-message">
-      {{ error }}
+    <div *ngIf="error()" 
+         class="error-message"
+         role="alert"
+         aria-live="polite">
+      {{ error() }}
     </div>
 
-    <p *ngIf="isLoading"><em>Loading weather data...</em></p>
+    <p *ngIf="isLoading()"><em>Loading weather data...</em></p>
 
-    <p *ngIf="!forecasts.length && !isLoading && !error">
+    <p *ngIf="!hasForecasts() && !isLoading() && !error()">
       <em>No forecasts available.</em>
     </p>
 
-    <table *ngIf="forecasts.length > 0" class="forecast-table">
+    <table *ngIf="hasForecasts()" class="forecast-table">
       <thead>
         <tr>
           <th>Date</th>
@@ -49,7 +59,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let forecast of forecasts">
+        <tr *ngFor="let forecast of forecasts()">
           <td>{{ forecast.date }}</td>
           <td>{{ forecast.temperatureC }}</td>
           <td>{{ forecast.temperatureF }}</td>

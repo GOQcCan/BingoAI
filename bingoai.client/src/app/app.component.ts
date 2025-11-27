@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from './auth.service';
@@ -15,13 +15,17 @@ interface WeatherForecast {
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: false,
-  styleUrl: './app.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush // ✅ Optimisation
+  styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public forecasts: WeatherForecast[] = [];
-  public isLoading = false;
-  public error: string | null = null;
+  // ✅ Utilisation de Signals pour la réactivité
+  public forecasts = signal<WeatherForecast[]>([]);
+  public isLoading = signal(false);
+  public error = signal<string | null>(null);
+  
+  // ✅ Signal computed pour vérifier si on a des données
+  public hasForecasts = computed(() => this.forecasts().length > 0);
+  
   private readonly _destroying$ = new Subject<void>();
 
   constructor(
@@ -39,7 +43,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.getForecasts();
         } else {
           console.log('User logged out');
-          this.forecasts = [];
+          this.forecasts.set([]);
         }
       });
   }
@@ -54,8 +58,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   getForecasts() {
-    this.isLoading = true;
-    this.error = null;
+    this.isLoading.set(true);
+    this.error.set(null);
 
     // Get the ID token from Google
     const idToken = this.authService.getIdToken();
@@ -69,13 +73,13 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroying$))
       .subscribe({
         next: (result) => {
-          this.forecasts = result;
-          this.isLoading = false;
+          this.forecasts.set(result);
+          this.isLoading.set(false);
         },
         error: (error) => {
           console.error('Error fetching forecasts:', error);
-          this.error = 'Failed to load weather forecasts. Please try again.';
-          this.isLoading = false;
+          this.error.set('Failed to load weather forecasts. Please try again.');
+          this.isLoading.set(false);
         }
       });
   }
