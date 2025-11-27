@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core';
 import { SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  public user$: Observable<SocialUser | null>;
+  private readonly currentUserSubject = new BehaviorSubject<SocialUser | null>(null);
+  public user$: Observable<SocialUser | null> = this.currentUserSubject.asObservable();
 
-  constructor(private socialAuthService: SocialAuthService) {
-    this.user$ = this.socialAuthService.authState;
+  constructor(private readonly socialAuthService: SocialAuthService) {
+    this.socialAuthService.authState.subscribe(user => 
+      this.currentUserSubject.next(user)
+    );
   }
 
   /**
@@ -24,10 +27,7 @@ export class AuthService {
    * Get the current user
    */
   getCurrentUser(): SocialUser | null {
-    // The authState is a BehaviorSubject, we can get its current value
-    let user: SocialUser | null = null;
-    this.user$.subscribe(u => user = u).unsubscribe();
-    return user;
+    return this.currentUserSubject.value;
   }
 
   /**

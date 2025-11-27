@@ -1,3 +1,5 @@
+﻿using System.ComponentModel.DataAnnotations;
+
 namespace BingoAI.Server
 {
     public class WeatherForecast
@@ -8,6 +10,7 @@ namespace BingoAI.Server
 
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 
+        [Required, MaxLength(100)]
         public string? Summary { get; set; }
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace BingoAI.Server
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+namespace BingoAI.Server
 {
     public class Program
     {
@@ -19,12 +22,58 @@
                 options.AddPolicy("AllowAngularApp",
                     policy =>
                     {
-                        policy.WithOrigins("https://localhost:59641", "http://localhost:4200")
+                        // ✅ Lire depuis configuration
+                        var allowedOrigins = builder.Configuration
+                            .GetSection("Cors:AllowedOrigins")
+                            .Get<string[]>() ?? [];
+
+                        policy.WithOrigins(allowedOrigins)
                               .AllowAnyHeader()
                               .AllowAnyMethod()
                               .AllowCredentials();
                     });
             });
+
+            var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
+                    ?? throw new InvalidOperationException("Google ClientId is not configured");
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                        .AddJwtBearer(options =>
+                        {
+                            options.Authority = "https://accounts.google.com";
+                            options.Audience = googleClientId;
+        
+                            // ✅ Configuration complète pour Google OAuth
+                            options.TokenValidationParameters = new TokenValidationParameters
+                            {
+                                ValidateIssuer = true,
+                                ValidIssuers = ["https://accounts.google.com", "accounts.google.com"],
+                                ValidateAudience = true,
+                                ValidAudience = googleClientId,
+                                ValidateLifetime = true,
+                                ClockSkew = TimeSpan.FromMinutes(5) // Tolérance pour la différence d'horloge
+                            };
+        
+                            // ✅ Logging pour debugging
+                            options.Events = new JwtBearerEvents
+                            {
+                                OnAuthenticationFailed = context =>
+                                {
+                                    context.HttpContext.RequestServices
+                                        .GetRequiredService<ILogger<Program>>()
+                                        .LogWarning("Authentication failed: {Error}", context.Exception.Message);
+                                    return Task.CompletedTask;
+                                },
+                                OnTokenValidated = context =>
+                                {
+                                    var logger = context.HttpContext.RequestServices
+                                        .GetRequiredService<ILogger<Program>>();
+                                    var email = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                                    logger.LogInformation("Token validated for user: {Email}", email);
+                                    return Task.CompletedTask;
+                                }
+                            };
+                        });
 
             var app = builder.Build();
 
@@ -43,6 +92,7 @@
 
             app.UseCors("AllowAngularApp");
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

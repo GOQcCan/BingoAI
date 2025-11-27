@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from './auth.service';
@@ -15,7 +15,8 @@ interface WeatherForecast {
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: false,
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush // ✅ Optimisation
 })
 export class AppComponent implements OnInit, OnDestroy {
   public forecasts: WeatherForecast[] = [];
@@ -24,7 +25,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly _destroying$ = new Subject<void>();
 
   constructor(
-    private http: HttpClient,
+    private readonly http: HttpClient,
     public authService: AuthService
   ) {}
 
