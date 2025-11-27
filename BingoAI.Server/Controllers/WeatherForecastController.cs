@@ -27,17 +27,18 @@ namespace BingoAI.Server.Controllers
             // Get the authorization header
             var authHeader = Request.Headers.Authorization.ToString();
             
-            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
                 return Unauthorized("No token provided");
             }
 
-            var idToken = authHeader.Substring("Bearer ".Length);
+            var idToken = authHeader["Bearer ".Length..];
 
             try
             {
                 // Validate the Google ID token
-                var googleClientId = _configuration["Authentication:Google:ClientId"];
+                var googleClientId = _configuration["Authentication:Google:ClientId"] 
+                    ?? throw new InvalidOperationException("Google ClientId is not configured");
                 
                 var validationSettings = new GoogleJsonWebSignature.ValidationSettings
                 {
@@ -47,7 +48,7 @@ namespace BingoAI.Server.Controllers
                 var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, validationSettings);
                 
                 // Token is valid, log the user info
-                _logger.LogInformation($"User authenticated: {payload.Email} ({payload.Name})");
+                _logger.LogInformation("User authenticated: {Email} ({Name})", payload.Email, payload.Name);
 
                 // Return weather data
                 return Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
@@ -60,7 +61,7 @@ namespace BingoAI.Server.Controllers
             }
             catch (InvalidJwtException ex)
             {
-                _logger.LogWarning($"Invalid Google token: {ex.Message}");
+                _logger.LogWarning("Invalid Google token: {Message}", ex.Message);
                 return Unauthorized("Invalid Google token");
             }
         }
