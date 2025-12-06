@@ -31,21 +31,6 @@
         "/*": "*",
         "/./~/*": "${webRoot}/node_modules/*"
       }
-    },
-    {
-      "name": "Attach to Chrome/Brave",
-      "type": "chrome",
-      "request": "attach",
-      "port": 9222,
-      "webRoot": "${workspaceFolder}/bingoai.client",
-      "sourceMaps": true,
-      "sourceMapPathOverrides": {
-        "webpack:/*": "${webRoot}/*",
-        "/./*": "${webRoot}/*",
-        "/src/*": "${webRoot}/src/*",
-        "/*": "*",
-        "/./~/*": "${webRoot}/node_modules/*"
-      }
     }
   ],
   "compounds": [
