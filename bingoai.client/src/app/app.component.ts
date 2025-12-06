@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { SocialAuthService, FacebookLoginProvider } from '@abacritt/angularx-social-login';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from './auth.service';
@@ -30,7 +31,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly http: HttpClient,
-    public authService: AuthService
+    public authService: AuthService,
+    private readonly socialAuthService: SocialAuthService
   ) {}
 
   ngOnInit() {
@@ -55,6 +57,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+  }
+
+  signInWithFacebook(): void {
+    this.socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID);
   }
 
   getForecasts() {

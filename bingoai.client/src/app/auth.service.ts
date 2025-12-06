@@ -55,11 +55,31 @@ export class AuthService {
   }
 
   /**
-   * Get ID token for API calls
+   * Get the authentication provider (google, facebook)
+   */
+  getProvider(): string {
+    const user = this.getCurrentUser();
+    return user ? user.provider : '';
+  }
+
+  /**
+   * Get token for API calls
+   * Returns idToken for Google, authToken for Facebook
    */
   getIdToken(): string | null {
     const user = this.getCurrentUser();
-    return user ? user.idToken : null;
+    if (!user) return null;
+    
+    // Google uses idToken, Facebook uses authToken (access token)
+    return user.idToken || user.authToken || null;
+  }
+
+  /**
+   * Get access token (for Facebook Graph API calls)
+   */
+  getAccessToken(): string | null {
+    const user = this.getCurrentUser();
+    return user ? user.authToken : null;
   }
 
   /**

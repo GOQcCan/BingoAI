@@ -2,17 +2,18 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-// Google Social Login
+// Social Login
 import { 
   SocialLoginModule, 
   SocialAuthServiceConfig,
   GoogleLoginProvider,
+  FacebookLoginProvider,
   GoogleSigninButtonModule 
 } from '@abacritt/angularx-social-login';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { googleConfig } from './auth-config';
+import { googleConfig, facebookConfig } from './auth-config';
 
 @NgModule({
   declarations: [
@@ -33,18 +34,28 @@ import { googleConfig } from './auth-config';
       provide: 'SocialAuthServiceConfig',
       useValue: {
         autoLogin: false,
-        lang: 'en',
+        lang: 'fr',
         providers: [
           {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(googleConfig.clientId, {
-              oneTapEnabled: false, // Disable One Tap
+              oneTapEnabled: false,
+              prompt: 'consent',
               scopes: 'openid profile email'
+            })
+          },
+          {
+            id: FacebookLoginProvider.PROVIDER_ID,
+            provider: new FacebookLoginProvider(facebookConfig.appId, {
+              scope: 'public_profile',
+              return_scopes: true,
+              enable_profile_selector: true,
+              version: facebookConfig.version
             })
           }
         ],
         onError: (err) => {
-          console.error('Google auth error:', err);
+          console.error('Social auth error:', err);
         }
       } as SocialAuthServiceConfig,
     }

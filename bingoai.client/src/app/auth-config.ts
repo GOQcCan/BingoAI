@@ -1,4 +1,4 @@
-import { environment } from '../environments/environment';
+import { environment } from '../environments/environment.local';
 
 /**
  * Configuration for Google Sign-In
@@ -25,6 +25,23 @@ import { environment } from '../environments/environment';
 
 export const googleConfig = {
   clientId: environment.googleClientId,
+};
+
+/**
+ * Configuration for Facebook Sign-In
+ * 
+ * Steps to get your Facebook App ID:
+ * 1. Go to https://developers.facebook.com/
+ * 2. Create a new app (Consumer type)
+ * 3. Add "Facebook Login" product
+ * 4. Go to Settings > Basic to get your App ID
+ * 5. In Facebook Login > Settings:
+ *    - Valid OAuth Redirect URIs: https://localhost:59641/
+ * 6. Copy the App ID and paste it in environment.local.ts
+ */
+export const facebookConfig = {
+  appId: environment.facebookAppId,
+  version: 'v18.0'
 };
 
 /**

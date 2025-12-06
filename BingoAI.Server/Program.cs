@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace BingoAI.Server
 {
@@ -11,6 +13,7 @@ namespace BingoAI.Server
 
             // Add services to the container.
             builder.Services.AddControllers();
+            builder.Services.AddHttpClient(); // Pour valider les tokens Facebook
             
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -36,9 +39,12 @@ namespace BingoAI.Server
 
             var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
                     ?? throw new InvalidOperationException("Google ClientId is not configured");
+            
+            var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"] ?? "";
+            var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"] ?? "";
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                        .AddJwtBearer(options =>
+                        .AddJwtBearer("Google", options =>
                         {
                             options.Authority = "https://accounts.google.com";
                             options.Audience = googleClientId;
@@ -51,7 +57,7 @@ namespace BingoAI.Server
                                 ValidateAudience = true,
                                 ValidAudience = googleClientId,
                                 ValidateLifetime = true,
-                                ClockSkew = TimeSpan.FromMinutes(5) // Tolérance pour la différence d'horloge
+                                ClockSkew = TimeSpan.FromMinutes(5)
                             };
         
                             // ✅ Logging pour debugging
@@ -61,19 +67,107 @@ namespace BingoAI.Server
                                 {
                                     context.HttpContext.RequestServices
                                         .GetRequiredService<ILogger<Program>>()
-                                        .LogWarning("Authentication failed: {Error}", context.Exception.Message);
+                                        .LogWarning("Google authentication failed: {Error}", context.Exception.Message);
                                     return Task.CompletedTask;
                                 },
                                 OnTokenValidated = context =>
                                 {
                                     var logger = context.HttpContext.RequestServices
                                         .GetRequiredService<ILogger<Program>>();
-                                    var email = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-                                    logger.LogInformation("Token validated for user: {Email}", email);
+                                    var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+                                    logger.LogInformation("Google token validated for user: {Email}", email);
                                     return Task.CompletedTask;
                                 }
                             };
+                        })
+                        .AddJwtBearer("Facebook", options =>
+                        {
+                            // Facebook n'utilise pas de JWT standard, on valide via Graph API
+                            options.Events = new JwtBearerEvents
+                            {
+                                OnMessageReceived = async context =>
+                                {
+                                    var token = context.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+                                    if (string.IsNullOrEmpty(token)) return;
+
+                                    // Skip si c'est un token Google (commence par ey et contient accounts.google.com)
+                                    if (token.StartsWith("ey") && token.Split('.').Length == 3)
+                                    {
+                                        try
+                                        {
+                                            var payload = token.Split('.')[1];
+                                            var padded = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+                                            var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(padded));
+                                            if (decoded.Contains("accounts.google.com"))
+                                            {
+                                                return; // C'est un token Google, laisser le schéma Google le gérer
+                                            }
+                                        }
+                                        catch { }
+                                    }
+
+                                    var httpClientFactory = context.HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>();
+                                    var httpClient = httpClientFactory.CreateClient();
+                                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+
+                                    // Valider le token Facebook via Graph API
+                                    var debugUrl = $"https://graph.facebook.com/debug_token?input_token={token}&access_token={facebookAppId}|{facebookAppSecret}";
+                                    
+                                    try
+                                    {
+                                        var response = await httpClient.GetAsync(debugUrl);
+                                        if (response.IsSuccessStatusCode)
+                                        {
+                                            var json = await response.Content.ReadAsStringAsync();
+                                            var debugResponse = JsonDocument.Parse(json);
+                                            var data = debugResponse.RootElement.GetProperty("data");
+                                            
+                                            if (data.GetProperty("is_valid").GetBoolean())
+                                            {
+                                                var userId = data.GetProperty("user_id").GetString();
+                                                
+                                                // Récupérer les infos utilisateur
+                                                var userUrl = $"https://graph.facebook.com/me?fields=id,name,email,picture&access_token={token}";
+                                                var userResponse = await httpClient.GetAsync(userUrl);
+                                                
+                                                if (userResponse.IsSuccessStatusCode)
+                                                {
+                                                    var userJson = await userResponse.Content.ReadAsStringAsync();
+                                                    var userData = JsonDocument.Parse(userJson).RootElement;
+                                                    
+                                                    var claims = new List<Claim>
+                                                    {
+                                                        new(ClaimTypes.NameIdentifier, userId ?? ""),
+                                                        new(ClaimTypes.Name, userData.TryGetProperty("name", out var name) ? name.GetString() ?? "" : ""),
+                                                        new(ClaimTypes.Email, userData.TryGetProperty("email", out var email) ? email.GetString() ?? "" : ""),
+                                                        new("provider", "facebook")
+                                                    };
+                                                    
+                                                    context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, "Facebook"));
+                                                    context.Success();
+                                                    
+                                                    logger.LogInformation("Facebook token validated for user: {Email}", 
+                                                        userData.TryGetProperty("email", out var userEmail) ? userEmail.GetString() : "unknown");
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        logger.LogWarning("Facebook token validation failed: {Error}", ex.Message);
+                                    }
+                                }
+                            };
                         });
+
+            // ✅ Policy d'autorisation qui accepte Google OU Facebook
+            builder.Services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes("Google", "Facebook")
+                    .Build();
+            });
 
             var app = builder.Build();
             
