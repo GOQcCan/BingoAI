@@ -5,10 +5,32 @@
       "name": "Launch Brave (Angular)",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:4200",
-      "webRoot": "${workspaceFolder}/bingoai.client/src",
+      "url": "https://localhost:59641",
+      "webRoot": "${workspaceFolder}/bingoai.client",
       "runtimeExecutable": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/src/*",
+        "/*": "*",
+        "/./~/*": "${webRoot}/node_modules/*"
+      }
+    },
+    {
+      "name": "Attach to Chrome/Brave",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}/bingoai.client",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/src/*",
+        "/*": "*",
+        "/./~/*": "${webRoot}/node_modules/*"
+      }
     }
   ]
 }
