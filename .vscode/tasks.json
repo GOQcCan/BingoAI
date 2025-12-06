@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-backend",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/BingoAI.Server/BingoAI.Server.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "serve-angular",
+      "type": "npm",
+      "script": "start",
+      "path": "bingoai.client",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "^\\s*(.*)\\((\\d+),(\\d+)\\):\\s+(error|warning|info)\\s+TS(\\d+):\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "code": 5,
+          "message": 6
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*Angular Live Development Server.*",
+          "endsPattern": ".*Application bundle generation complete.*|.*Compiled successfully.*"
+        }
+      },
+      "group": "build"
+    },
+    {
+      "label": "start-fullstack",
+      "dependsOn": ["serve-angular"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    }
+  ]
+}

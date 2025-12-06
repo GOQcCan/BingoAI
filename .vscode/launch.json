@@ -2,9 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": ".NET Backend",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-backend",
+      "program": "${workspaceFolder}/BingoAI.Server/bin/Debug/net8.0/BingoAI.Server.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/BingoAI.Server",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:7077;http://localhost:5100"
+      }
+    },
+    {
       "name": "Launch Brave (Angular)",
       "type": "chrome",
       "request": "launch",
+      "preLaunchTask": "serve-angular",
       "url": "https://localhost:59641",
       "webRoot": "${workspaceFolder}/bingoai.client",
       "runtimeExecutable": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
@@ -30,6 +45,18 @@
         "/src/*": "${webRoot}/src/*",
         "/*": "*",
         "/./~/*": "${webRoot}/node_modules/*"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (Angular + .NET)",
+      "configurations": [".NET Backend", "Launch Brave (Angular)"],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "fullstack",
+        "order": 1
       }
     }
   ]
