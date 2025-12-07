@@ -11,5 +11,6 @@
 export const environment = {
   production: true,
   googleClientId: '${GOOGLE_CLIENT_ID}', // Will be replaced during build
+  facebookAppId: '${FACEBOOK_APP_ID}', // Will be replaced during build
   apiUrl: '/weatherforecast'
 };

@@ -8,5 +8,6 @@
 export const environment = {
   production: false,
   googleClientId: 'YOUR-GOOGLE-CLIENT-ID.apps.googleusercontent.com',
+  facebookAppId: 'YOUR-FACEBOOK-APP-ID',
   apiUrl: '/weatherforecast'
 };

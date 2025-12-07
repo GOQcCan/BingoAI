@@ -11,6 +11,7 @@
  */
 export const environment = {
   production: false,
-  googleClientId: 'YOUR-REAL-GOOGLE-CLIENT-ID.apps.googleusercontent.com', // TODO: Replace with your real Client ID
+  googleClientId: 'YOUR-GOOGLE-CLIENT-ID.apps.googleusercontent.com', // TODO: Replace with your real Client ID
+  facebookAppId: 'YOUR-FACEBOOK-APP-ID', // TODO: Replace with your real Facebook App ID
   apiUrl: '/weatherforecast'
 };
