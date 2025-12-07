@@ -1,4 +1,4 @@
-﻿# 🎯 BingoAI - Weather Forecast Application
+﻿# 🎯 BingoAI - Bingo is a game of chance where players mark numbers on a 5x5 grid to complete a line and shout “Bingo!”
 
 A full-stack application built with **Angular 19** and **.NET 10** featuring **Google** and **Facebook** OAuth authentication.
 
@@ -35,7 +35,7 @@ BingoAI/
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Node.js 18+](https://nodejs.org/)
 - [Angular CLI](https://angular.io/cli) (`npm install -g @angular/cli`)
 - [Google Cloud Console](https://console.cloud.google.com/) account
