@@ -1,6 +1,6 @@
 ﻿# 🎯 BingoAI - Weather Forecast Application
 
-A full-stack application built with **Angular 19** and **.NET 8** featuring Google OAuth authentication.
+A full-stack application built with **Angular 19** and **.NET 8** featuring **Google** and **Facebook** OAuth authentication.
 
 ## 🏗️ Architecture
 
@@ -23,7 +23,8 @@ BingoAI/
 ## ✨ Features
 
 - ✅ **Google OAuth Authentication** via Google Sign-In
-- ✅ **JWT Token Validation** on backend
+- ✅ **Facebook OAuth Authentication** via Facebook Login
+- ✅ **JWT Token Validation** on backend (Google + Facebook Graph API)
 - ✅ **Secure API Endpoints** with Bearer token authentication
 - ✅ **Dark Mode Support** with automatic system detection
 - ✅ **Responsive UI** with modern design
@@ -37,7 +38,8 @@ BingoAI/
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Node.js 18+](https://nodejs.org/)
 - [Angular CLI](https://angular.io/cli) (`npm install -g @angular/cli`)
-- Google Cloud Console account
+- [Google Cloud Console](https://console.cloud.google.com/) account
+- [Facebook Developers](https://developers.facebook.com/) account
 
 ### 1. Clone the Repository
 
@@ -56,11 +58,13 @@ cd BingoAI
 # Frontend - Create local environment
 cd bingoai.client/src/environments
 cp environment.local.template.ts environment.local.ts
-# Edit environment.local.ts with your Google Client ID
+# Edit environment.local.ts with your Google Client ID and Facebook App ID
 
 # Backend - Use .NET User Secrets
 cd ../../../BingoAI.Server
-dotnet user-secrets set "Authentication:Google:ClientId" "YOUR-CLIENT-ID.apps.googleusercontent.com"
+dotnet user-secrets set "Authentication:Google:ClientId" "YOUR-GOOGLE-CLIENT-ID.apps.googleusercontent.com"
+dotnet user-secrets set "Authentication:Facebook:AppId" "YOUR-FACEBOOK-APP-ID"
+dotnet user-secrets set "Authentication:Facebook:AppSecret" "YOUR-FACEBOOK-APP-SECRET"
 ```
 
 ### 3. Install Dependencies
@@ -119,13 +123,24 @@ https://localhost:59641
    - Production: Your production URL
 4. Copy the Client ID
 
+### Facebook OAuth Setup
+
+1. Go to [Facebook Developers](https://developers.facebook.com/)
+2. Create a new app (Consumer type)
+3. Add "Facebook Login" product
+4. Go to Settings > Basic to get your App ID and App Secret
+5. In Facebook Login > Settings:
+   - Valid OAuth Redirect URIs: `https://localhost:59641/`
+6. Copy the App ID and App Secret
+
 ### Frontend Configuration
 
 ```typescript
 // bingoai.client/src/environments/environment.local.ts
 export const environment = {
   production: false,
-  googleClientId: 'YOUR-CLIENT-ID.apps.googleusercontent.com',
+  googleClientId: 'YOUR-GOOGLE-CLIENT-ID.apps.googleusercontent.com',
+  facebookAppId: 'YOUR-FACEBOOK-APP-ID',
   apiUrl: '/weatherforecast'
 };
 ```
@@ -135,7 +150,13 @@ export const environment = {
 ```bash
 # Using .NET User Secrets (recommended)
 cd BingoAI.Server
-dotnet user-secrets set "Authentication:Google:ClientId" "YOUR-CLIENT-ID"
+
+# Google OAuth
+dotnet user-secrets set "Authentication:Google:ClientId" "YOUR-GOOGLE-CLIENT-ID"
+
+# Facebook OAuth
+dotnet user-secrets set "Authentication:Facebook:AppId" "YOUR-FACEBOOK-APP-ID"
+dotnet user-secrets set "Authentication:Facebook:AppSecret" "YOUR-FACEBOOK-APP-SECRET"
 ```
 
 ## 🛠️ Technology Stack
@@ -143,30 +164,36 @@ dotnet user-secrets set "Authentication:Google:ClientId" "YOUR-CLIENT-ID"
 ### Frontend
 - **Framework**: Angular 19.1.0
 - **Language**: TypeScript 5.7.2
-- **Authentication**: @abacritt/angularx-social-login 2.2.0
+- **Authentication**: @abacritt/angularx-social-login 2.2.0 (Google + Facebook)
 - **HTTP Client**: Angular HttpClient
 - **Testing**: Jasmine + Karma
 
 ### Backend
 - **Framework**: ASP.NET Core 8.0
 - **Language**: C# 12
-- **Authentication**: Google.Apis.Auth 1.68.0
+- **Authentication**: 
+  - Google: JWT Token Validation via Google OIDC
+  - Facebook: Access Token Validation via Graph API
 - **API Documentation**: Swagger/OpenAPI
 
 ## 📝 Environment Variables
 
 ### Required Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | `xxxxx.apps.googleusercontent.com` |
-| `Authentication__Google__ClientId` | Backend Google Client ID | Same as above |
+| Variable | Location | Description | Example |
+|----------|----------|-------------|---------|
+| `googleClientId` | Frontend | Google OAuth Client ID | `xxxxx.apps.googleusercontent.com` |
+| `facebookAppId` | Frontend | Facebook App ID | `1234567890` |
+| `Authentication:Google:ClientId` | Backend | Google OAuth Client ID | `xxxxx.apps.googleusercontent.com` |
+| `Authentication:Facebook:AppId` | Backend | Facebook App ID | `1234567890` |
+| `Authentication:Facebook:AppSecret` | Backend | Facebook App Secret | `abc123def456...` |
 
 ## 🔗 Resources
 
 - [Angular Documentation](https://angular.io/docs)
 - [.NET Documentation](https://learn.microsoft.com/en-us/dotnet/)
 - [Google OAuth Guide](https://developers.google.com/identity/protocols/oauth2)
+- [Facebook Login Guide](https://developers.facebook.com/docs/facebook-login/)
 - [Environment Setup Guide](./ENVIRONMENT_SETUP.md)
 
 ---
