@@ -70,6 +70,9 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Create Angular obj directory (required for esproj reference)
+        run: mkdir -p bingoai.client/obj/Debug
+
       - name: Restore dependencies
         working-directory: BingoAI.Server
         run: dotnet restore
