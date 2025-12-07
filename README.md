@@ -1,12 +1,12 @@
 ﻿# 🎯 BingoAI - Weather Forecast Application
 
-A full-stack application built with **Angular 19** and **.NET 8** featuring **Google** and **Facebook** OAuth authentication.
+A full-stack application built with **Angular 19** and **.NET 10** featuring **Google** and **Facebook** OAuth authentication.
 
 ## 🏗️ Architecture
 
 ```
 BingoAI/
-├── BingoAI.Server/          # .NET 8 Web API
+├── BingoAI.Server/          # .NET 10 Web API
 │   ├── Controllers/         # API endpoints
 │   ├── Program.cs          # Application configuration
 │   └── appsettings.json    # Configuration (no secrets)
@@ -83,7 +83,7 @@ dotnet restore
 
 #### Option A: Visual Studio (Recommended)
 
-1. Open `BingoAI.sln` in Visual Studio 2022
+1. Open `BingoAI.sln` in Visual Studio 2026
 2. Set **Multiple Startup Projects**:
    - `BingoAI.Server` → Start
    - `bingoai.client` → Start
@@ -169,8 +169,8 @@ dotnet user-secrets set "Authentication:Facebook:AppSecret" "YOUR-FACEBOOK-APP-S
 - **Testing**: Jasmine + Karma
 
 ### Backend
-- **Framework**: ASP.NET Core 8.0
-- **Language**: C# 12
+- **Framework**: ASP.NET Core 10.0
+- **Language**: C# 14
 - **Authentication**: 
   - Google: JWT Token Validation via Google OIDC
   - Facebook: Access Token Validation via Graph API
