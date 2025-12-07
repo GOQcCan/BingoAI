@@ -1,5 +1,6 @@
 ﻿# Example: Azure DevOps Pipeline for BingoAI
 # This pipeline builds and deploys the application with environment variable replacement
+# Supports Google and Facebook OAuth authentication
 
 trigger:
   branches:
@@ -11,7 +12,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: BingoAI-Production # Variable group in Azure DevOps
+  - group: BingoAI-Production # Variable group in Azure DevOps containing:
+                               # - GoogleClientId
+                               # - FacebookAppId
+                               # - FacebookAppSecret
 
 stages:
   - stage: Build
@@ -48,7 +52,8 @@ stages:
               useLegacyPattern: false
               enableTelemetry: true
             env:
-              GOOGLE_CLIENT_ID: $(GoogleClientId) # From variable group
+              GOOGLE_CLIENT_ID: $(GoogleClientId)   # From variable group
+              FACEBOOK_APP_ID: $(FacebookAppId)     # From variable group
 
           - task: PublishBuildArtifacts@1
             inputs:
@@ -61,8 +66,8 @@ stages:
         steps:
           - task: UseDotNet@2
             inputs:
-              version: '8.x'
-            displayName: 'Install .NET 8'
+              version: '10.x'
+            displayName: 'Install .NET 10'
 
           - script: |
               cd BingoAI.Server
@@ -97,6 +102,8 @@ stages:
                     package: '$(Pipeline.Workspace)/backend'
                     appSettings: |
                       -Authentication__Google__ClientId "$(GoogleClientId)"
+                      -Authentication__Facebook__AppId "$(FacebookAppId)"
+                      -Authentication__Facebook__AppSecret "$(FacebookAppSecret)"
                   displayName: 'Deploy to Azure App Service'
 
       - deployment: DeployFrontend
