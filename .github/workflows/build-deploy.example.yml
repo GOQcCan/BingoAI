@@ -89,47 +89,47 @@ jobs:
           path: BingoAI.Server/publish
           retention-days: 5
 
-  deploy:
-    name: Deploy to Azure
-    runs-on: ubuntu-latest
-    needs: [build-frontend, build-backend]
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-    environment: production
+#  deploy:
+#    name: Deploy to Azure
+#    runs-on: ubuntu-latest
+#    needs: [build-frontend, build-backend]
+#    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+#    environment: production
     
-    steps:
-      - name: Download frontend artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend
-          path: frontend
+#    steps:
+#      - name: Download frontend artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: frontend
+#          path: frontend
 
-      - name: Download backend artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend
-          path: backend
+#      - name: Download backend artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: backend
+#          path: backend
 
       # Deploy Backend to Azure App Service
-      - name: Deploy Backend to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'bingoai-backend'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: backend
-        env:
-          Authentication__Google__ClientId: ${{ secrets.GOOGLE_CLIENT_ID }}
-          Authentication__Facebook__AppId: ${{ secrets.FACEBOOK_APP_ID }}
-          Authentication__Facebook__AppSecret: ${{ secrets.FACEBOOK_APP_SECRET }}
+#      - name: Deploy Backend to Azure App Service
+#        uses: azure/webapps-deploy@v3
+#        with:
+#          app-name: 'bingoai-backend'
+#          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+#          package: backend
+#        env:
+#          Authentication__Google__ClientId: ${{ secrets.GOOGLE_CLIENT_ID }}
+#          Authentication__Facebook__AppId: ${{ secrets.FACEBOOK_APP_ID }}
+#          Authentication__Facebook__AppSecret: ${{ secrets.FACEBOOK_APP_SECRET }}
 
       # Deploy Frontend to Azure Static Web Apps
-      - name: Deploy Frontend to Azure Static Web Apps
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: 'upload'
-          app_location: 'frontend'
-          skip_app_build: true
+#      - name: Deploy Frontend to Azure Static Web Apps
+#        uses: Azure/static-web-apps-deploy@v1
+#        with:
+#          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+#          repo_token: ${{ secrets.GITHUB_TOKEN }}
+#          action: 'upload'
+#          app_location: 'frontend'
+#          skip_app_build: true
 
 # Required GitHub Secrets:
 # - GOOGLE_CLIENT_ID: Google OAuth Client ID
