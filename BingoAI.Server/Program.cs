@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using BingoAI.Server.Authorization;
+using BingoAI.Server.Data;
+using BingoAI.Server.Services;
+using BingoAI.Server.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Json;
@@ -14,6 +20,14 @@ namespace BingoAI.Server
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddHttpClient(); // Pour valider les tokens Facebook
+
+            // ✅ Configuration SQLite avec Entity Framework Core
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
+                    ?? "Data Source=BingoAI.db"));
+
+            // ✅ Enregistrement des services (Dependency Injection - SOLID DIP)
+            builder.Services.AddScoped<IImageService, ImageService>();
             
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -39,9 +53,10 @@ namespace BingoAI.Server
 
             var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
                     ?? throw new InvalidOperationException("Google ClientId is not configured");
-            
-            var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"] ?? "";
-            var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"] ?? "";
+            var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"]
+                    ?? throw new InvalidOperationException("Facebook AppId is not configured");
+            var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]
+                    ?? throw new InvalidOperationException("Facebook AppSecret is not configured");
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                         .AddJwtBearer("Google", options =>
@@ -169,8 +184,18 @@ namespace BingoAI.Server
                     .Build();
             });
 
+            // Ajoutez cette ligne après les autres services
+            builder.Services.AddSingleton<IAuthorizationHandler, ImageOwnerAuthorizationHandler>();
+
             var app = builder.Build();
-            
+
+            if (app.Environment.IsDevelopment())
+            {
+                using var scope = app.Services.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.Migrate();
+            }
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
