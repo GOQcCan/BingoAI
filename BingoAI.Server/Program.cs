@@ -13,6 +13,8 @@ namespace BingoAI.Server
 {
     public class Program
     {
+        protected Program() { }
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -80,13 +82,11 @@ namespace BingoAI.Server
             .AddJwtBearer("Google", options => ConfigureGoogleJwtBearer(options, googleClientId))
             .AddJwtBearer("Facebook", options => ConfigureFacebookJwtBearer(options, facebookAppId, facebookAppSecret));
 
-            builder.Services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+            builder.Services.AddAuthorizationBuilder()
+                .SetDefaultPolicy(new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .AddAuthenticationSchemes("Google", "Facebook")
-                    .Build();
-            });
+                    .Build());
         }
 
         private static void ConfigureGoogleJwtBearer(JwtBearerOptions options, string googleClientId)
@@ -277,13 +277,13 @@ namespace BingoAI.Server
 
         private static List<Claim> BuildFacebookClaims(string? userId, JsonElement userData)
         {
-            return new List<Claim>
-            {
+            return
+            [
                 new(ClaimTypes.NameIdentifier, userId ?? ""),
                 new(ClaimTypes.Name, userData.TryGetProperty("name", out var name) ? name.GetString() ?? "" : ""),
                 new(ClaimTypes.Email, userData.TryGetProperty("email", out var email) ? email.GetString() ?? "" : ""),
                 new("provider", "facebook")
-            };
+            ];
         }
     }
 }
