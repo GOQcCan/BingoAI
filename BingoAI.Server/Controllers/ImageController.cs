@@ -42,7 +42,10 @@ public class ImageController(
         }
         catch (ArgumentException ex)
         {
-            logger.LogWarning("Image upload validation failed: {Message}", ex.Message);
+            if (logger.IsEnabled(LogLevel.Warning))
+            {
+                logger.LogWarning(ex, "Image upload validation failed: {Message}", ex.Message);
+            }
             return BadRequest(new { error = ex.Message });
         }
     }
