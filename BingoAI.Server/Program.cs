@@ -130,7 +130,7 @@ namespace BingoAI.Server
                     var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
                     if (logger.IsEnabled(LogLevel.Information))
                     {
-                        logger.LogInformation("Google token validated for user: {Email}", email);
+                        logger.LogInformation("Google token validated for a user.");
                     }
                     return Task.CompletedTask;
                 }
