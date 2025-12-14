@@ -25,10 +25,6 @@ namespace BingoAI.Server.Controllers
         public IActionResult Get()
         {
             // ✅ Le token est déjà validé par le middleware [Authorize]
-            // Accès aux claims de l'utilisateur via User.Claims
-            var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            
             _logger.LogInformation("User authenticated successfully."); // Avoid logging private data such as email or name
 
             // Return weather data
