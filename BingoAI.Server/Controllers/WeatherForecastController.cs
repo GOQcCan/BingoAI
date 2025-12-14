@@ -29,7 +29,7 @@ namespace BingoAI.Server.Controllers
             var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
             var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             
-            _logger.LogInformation("User authenticated: {Email} ({Name})", userEmail, userName);
+            _logger.LogInformation("User authenticated successfully."); // Avoid logging private data such as email or name
 
             // Return weather data
             return Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
