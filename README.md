@@ -1,4 +1,4 @@
-﻿# 🎯 BingoAI - Bingo is a game of chance where players mark numbers on a 5x5 grid to complete a line and shout “Bingo!”
+﻿# 🎯 BingoAI - Bingo is a game of chance where players mark numbers on a 5x5 grid to complete a line and shout "Bingo!"
 
 A full-stack application built with **Angular 19** and **.NET 10** featuring **Google** and **Facebook** OAuth authentication.
 
@@ -40,6 +40,7 @@ BingoAI/
 - [Angular CLI](https://angular.io/cli) (`npm install -g @angular/cli`)
 - [Google Cloud Console](https://console.cloud.google.com/) account
 - [Facebook Developers](https://developers.facebook.com/) account
+- [Visual Studio 2026](https://visualstudio.microsoft.com/vs/) (recommended)
 
 ### 1. Clone the Repository
 
@@ -170,11 +171,12 @@ dotnet user-secrets set "Authentication:Facebook:AppSecret" "YOUR-FACEBOOK-APP-S
 
 ### Backend
 - **Framework**: ASP.NET Core 10.0
-- **Language**: C# 14
+- **Language**: C# 14.0
 - **Authentication**: 
   - Google: JWT Token Validation via Google OIDC
   - Facebook: Access Token Validation via Graph API
 - **API Documentation**: Swagger/OpenAPI
+- **ORM**: Entity Framework Core 10.0
 
 ## 📝 Environment Variables
 
@@ -191,10 +193,12 @@ dotnet user-secrets set "Authentication:Facebook:AppSecret" "YOUR-FACEBOOK-APP-S
 ## 🔗 Resources
 
 - [Angular Documentation](https://angular.io/docs)
-- [.NET Documentation](https://learn.microsoft.com/en-us/dotnet/)
+- [.NET 10 Documentation](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/overview)
+- [C# 14 What's New](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14)
 - [Google OAuth Guide](https://developers.google.com/identity/protocols/oauth2)
 - [Facebook Login Guide](https://developers.facebook.com/docs/facebook-login/)
 - [Environment Setup Guide](./ENVIRONMENT_SETUP.md)
+- [C# 14 Features Applied](./CSHARP14_FEATURES.md)
 
 ---
 

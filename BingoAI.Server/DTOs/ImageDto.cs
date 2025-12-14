@@ -6,14 +6,14 @@ namespace BingoAI.Server.DTOs
     /// </summary>
     public class ImageMetadataDto
     {
-        public Guid Id { get; set; }
-        public string FileName { get; set; } = string.Empty;
-        public string ContentType { get; set; } = string.Empty;
-        public long FileSize { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public string? Description { get; set; }
-        public string? Tags { get; set; }
+        public required Guid Id { get; init; }
+        public required string FileName { get; init; }
+        public required string ContentType { get; init; }
+        public required long FileSize { get; init; }
+        public required DateTime CreatedAt { get; init; }
+        public DateTime? UpdatedAt { get; init; }
+        public string? Description { get; init; }
+        public string? Tags { get; init; }
     }
 
     /// <summary>
@@ -21,8 +21,8 @@ namespace BingoAI.Server.DTOs
     /// </summary>
     public class ImageUpdateDto
     {
-        public string? Description { get; set; }
-        public string? Tags { get; set; }
+        public string? Description { get; init; }
+        public string? Tags { get; init; }
     }
 
     /// <summary>
@@ -30,8 +30,8 @@ namespace BingoAI.Server.DTOs
     /// </summary>
     public class ImageUploadDto
     {
-        public IFormFile File { get; set; } = null!;
-        public string? Description { get; set; }
-        public string? Tags { get; set; }
+        public required IFormFile File { get; init; }
+        public string? Description { get; init; }
+        public string? Tags { get; init; }
     }
 }

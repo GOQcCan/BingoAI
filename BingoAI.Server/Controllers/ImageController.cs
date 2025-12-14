@@ -179,12 +179,10 @@ public class ImageController(
         return result.Succeeded;
     }
 
-    private string? GetCurrentUserId()
-    {
-        return User.FindFirst(ClaimTypes.Email)?.Value
-            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value;
-    }
+    private string? GetCurrentUserId() =>
+        User.FindFirst(ClaimTypes.Email)?.Value
+        ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        ?? User.FindFirst("sub")?.Value;
 
     private static ImageMetadataDto MapToDto(ImageEntity image) => new()
     {

@@ -11,22 +11,38 @@ namespace BingoAI.Server.Models
         /// <summary>
         /// Nom original du fichier uploadé
         /// </summary>
-        public string FileName { get; set; } = string.Empty;
+        public required string FileName
+        {
+            get;
+            set => field = string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("Le nom de fichier ne peut pas être vide.", nameof(FileName)) : value;
+        }
         
         /// <summary>
         /// Type MIME de l'image (ex: image/png, image/jpeg)
         /// </summary>
-        public string ContentType { get; set; } = string.Empty;
+        public required string ContentType
+        {
+            get;
+            set => field = string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("Le type de contenu ne peut pas être vide.", nameof(ContentType)) : value;
+        }
         
         /// <summary>
         /// Données binaires de l'image
         /// </summary>
-        public byte[] Data { get; set; } = [];
+        public required byte[] Data
+        {
+            get;
+            set => field = value.Length == 0 ? throw new ArgumentException("Les données ne peuvent pas être vides.", nameof(Data)) : value;
+        }
         
         /// <summary>
         /// Taille du fichier en bytes
         /// </summary>
-        public long FileSize { get; set; }
+        public long FileSize
+        {
+            get;
+            set => field = value <= 0 ? throw new ArgumentException("La taille du fichier doit être positive.", nameof(FileSize)) : value;
+        }
         
         /// <summary>
         /// Date de création de l'enregistrement

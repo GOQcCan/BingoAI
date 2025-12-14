@@ -14,7 +14,11 @@ public class ImageOwnerAuthorizationHandler : AuthorizationHandler<ImageOwnerReq
         ImageOwnerRequirement requirement,
         ImageEntity resource)
     {
-        if (context.User is null || resource is null)
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(requirement);
+        ArgumentNullException.ThrowIfNull(resource);
+
+        if (context.User is null)
         {
             return Task.CompletedTask;
         }
@@ -29,10 +33,8 @@ public class ImageOwnerAuthorizationHandler : AuthorizationHandler<ImageOwnerReq
         return Task.CompletedTask;
     }
 
-    private static string? GetUserId(ClaimsPrincipal user)
-    {
-        return user.FindFirst(ClaimTypes.Email)?.Value
-            ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? user.FindFirst("sub")?.Value;
-    }
+    private static string? GetUserId(ClaimsPrincipal user) =>
+        user.FindFirst(ClaimTypes.Email)?.Value
+        ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        ?? user.FindFirst("sub")?.Value;
 }

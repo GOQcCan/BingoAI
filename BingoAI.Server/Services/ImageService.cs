@@ -10,11 +10,8 @@ namespace BingoAI.Server.Services
     /// Suit le principe de responsabilité unique (SRP) - gère uniquement la logique métier des images.
     /// Suit le principe ouvert/fermé (OCP) - peut être étendu sans modifier le code existant.
     /// </summary>
-    public class ImageService : IImageService
+    public class ImageService(AppDbContext context, ILogger<ImageService> logger) : IImageService
     {
-        private readonly AppDbContext _context;
-        private readonly ILogger<ImageService> _logger;
-
         // Types MIME autorisés pour les images
         private static readonly HashSet<string> AllowedContentTypes =
         [
@@ -28,12 +25,6 @@ namespace BingoAI.Server.Services
 
         // Taille maximale de fichier (10 MB)
         private const long MaxFileSize = 10 * 1024 * 1024;
-
-        public ImageService(AppDbContext context, ILogger<ImageService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
 
         public async Task<ImageEntity> SaveImageAsync(IFormFile file, string? userId, string? description = null, string? tags = null)
         {
@@ -55,23 +46,26 @@ namespace BingoAI.Server.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Images.Add(image);
-            await _context.SaveChangesAsync();
+            context.Images.Add(image);
+            await context.SaveChangesAsync();
 
-            _logger.LogInformation("Image saved: {FileName} (ID: {Id}) for user: {UserId}", 
-                image.FileName, image.Id, userId);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Image saved: {FileName} (ID: {Id}) for user: {UserId}",
+                    image.FileName, image.Id, userId);
+            }
 
             return image;
         }
 
         public async Task<ImageEntity?> GetImageByIdAsync(Guid id)
         {
-            return await _context.Images.FindAsync(id);
+            return await context.Images.FindAsync(id);
         }
 
         public async Task<IEnumerable<ImageEntity>> GetImagesByUserIdAsync(string userId)
         {
-            return await _context.Images
+            return await context.Images
                 .Where(i => i.UserId == userId)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
@@ -79,56 +73,65 @@ namespace BingoAI.Server.Services
 
         public async Task<ImageEntity?> UpdateImageMetadataAsync(Guid id, string? description, string? tags)
         {
-            var image = await _context.Images.FindAsync(id);
+            var image = await context.Images.FindAsync(id);
             
-            if (image == null)
+            if (image is null)
             {
                 return null;
             }
 
-            image.Description = description;
-            image.Tags = tags;
-            image.UpdatedAt = DateTime.UtcNow;
+            // Utilisation du null-conditional assignment de C# 14
+            image?.Description = description;
+            image?.Tags = tags;
+            image?.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            _logger.LogInformation("Image metadata updated: ID {Id}", id);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Image metadata updated: ID {Id}", id);
+            }
 
             return image;
         }
 
         public async Task<bool> DeleteImageAsync(Guid id)
         {
-            var image = await _context.Images.FindAsync(id);
+            var image = await context.Images.FindAsync(id);
             
-            if (image == null)
+            if (image is null)
             {
                 return false;
             }
 
-            _context.Images.Remove(image);
-            await _context.SaveChangesAsync();
+            context.Images.Remove(image);
+            await context.SaveChangesAsync();
 
-            _logger.LogInformation("Image deleted: ID {Id}", id);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Image deleted: ID {Id}", id);
+            }
 
             return true;
         }
 
         private static void ValidateFile(IFormFile file)
         {
-            if (file == null || file.Length == 0)
+            ArgumentNullException.ThrowIfNull(file, nameof(file));
+
+            if (file.Length == 0)
             {
-                throw new ArgumentException("Le fichier est vide ou null.");
+                throw new ArgumentException("Le fichier est vide.", nameof(file));
             }
 
             if (file.Length > MaxFileSize)
             {
-                throw new ArgumentException($"Le fichier dépasse la taille maximale autorisée ({MaxFileSize / (1024 * 1024)} MB).");
+                throw new ArgumentException($"Le fichier dépasse la taille maximale autorisée ({MaxFileSize / (1024 * 1024)} MB).", nameof(file));
             }
 
             if (!AllowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
             {
-                throw new ArgumentException($"Type de fichier non autorisé: {file.ContentType}. Types autorisés: {string.Join(", ", AllowedContentTypes)}");
+                throw new ArgumentException($"Type de fichier non autorisé: {file.ContentType}. Types autorisés: {string.Join(", ", AllowedContentTypes)}", nameof(file));
             }
         }
     }
