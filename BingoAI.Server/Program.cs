@@ -127,7 +127,6 @@ namespace BingoAI.Server
                 OnTokenValidated = context =>
                 {
                     var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                    var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
                     if (logger.IsEnabled(LogLevel.Information))
                     {
                         logger.LogInformation("Google token validated for a user.");

@@ -2,7 +2,6 @@ namespace BingoAI.Server.DTOs
 {
     /// <summary>
     /// DTO pour la réponse d'une image (sans les données binaires).
-    /// Suit le principe de ségrégation des interfaces (ISP) - expose uniquement les métadonnées.
     /// </summary>
     public class ImageMetadataDto
     {

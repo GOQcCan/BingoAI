@@ -2,7 +2,6 @@ namespace BingoAI.Server.Models
 {
     /// <summary>
     /// Entité représentant une image stockée avec ses métadonnées.
-    /// Suit le principe de responsabilité unique (SRP) - ne contient que les données de l'image.
     /// </summary>
     public class ImageEntity
     {

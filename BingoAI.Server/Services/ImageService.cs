@@ -1,4 +1,5 @@
 using BingoAI.Server.Data;
+using BingoAI.Server.Extensions;
 using BingoAI.Server.Models;
 using BingoAI.Server.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -7,24 +8,10 @@ namespace BingoAI.Server.Services
 {
     /// <summary>
     /// Service de gestion des images.
-    /// Suit le principe de responsabilité unique (SRP) - gère uniquement la logique métier des images.
-    /// Suit le principe ouvert/fermé (OCP) - peut être étendu sans modifier le code existant.
     /// </summary>
     public class ImageService(AppDbContext context, ILogger<ImageService> logger) : IImageService
     {
-        // Types MIME autorisés pour les images
-        private static readonly HashSet<string> AllowedContentTypes =
-        [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-            "image/bmp",
-            "image/svg+xml"
-        ];
-
-        // Taille maximale de fichier (10 MB)
-        private const long MaxFileSize = 10 * 1024 * 1024;
+        // Les constantes locales ont été supprimées au profit des extensions statiques sur ImageEntity
 
         public async Task<ImageEntity> SaveImageAsync(IFormFile file, string? userId, string? description = null, string? tags = null)
         {
@@ -45,6 +32,12 @@ namespace BingoAI.Server.Services
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow
             };
+
+            // Utilisation de la propriété d'extension IsValid pour garantir l'intégrité de l'entité avant la sauvegarde
+            if (!image.IsValid)
+            {
+                throw new InvalidOperationException("L'entité image générée ne respecte pas les règles de validation (taille ou type de contenu).");
+            }
 
             context.Images.Add(image);
             await context.SaveChangesAsync();
@@ -124,14 +117,15 @@ namespace BingoAI.Server.Services
                 throw new ArgumentException("Le fichier est vide.", nameof(file));
             }
 
-            if (file.Length > MaxFileSize)
+            // Utilisation des extensions statiques C# 14 sur le type ImageEntity
+            if (file.Length > ImageEntity.MaxFileSize)
             {
-                throw new ArgumentException($"Le fichier dépasse la taille maximale autorisée ({MaxFileSize / (1024 * 1024)} MB).", nameof(file));
+                throw new ArgumentException($"Le fichier dépasse la taille maximale autorisée ({ImageEntity.MaxFileSize / (1024 * 1024)} MB).", nameof(file));
             }
 
-            if (!AllowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
+            if (!ImageEntity.IsSupportedContentType(file.ContentType))
             {
-                throw new ArgumentException($"Type de fichier non autorisé: {file.ContentType}. Types autorisés: {string.Join(", ", AllowedContentTypes)}", nameof(file));
+                throw new ArgumentException($"Type de fichier non autorisé: {file.ContentType}. Types autorisés: {string.Join(", ", ImageEntity.GetSupportedContentTypes())}", nameof(file));
             }
         }
     }

@@ -1,3 +1,4 @@
+using BingoAI.Server.Extensions;
 using BingoAI.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -25,7 +26,7 @@ public class ImageOwnerAuthorizationHandler : AuthorizationHandler<ImageOwnerReq
 
         var userId = GetUserId(context.User);
 
-        if (!string.IsNullOrEmpty(userId) && resource.UserId == userId)
+        if (!string.IsNullOrEmpty(userId) && resource.BelongsTo(userId))
         {
             context.Succeed(requirement);
         }

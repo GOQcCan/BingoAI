@@ -2,7 +2,7 @@ using BingoAI.Server.Models;
 
 namespace BingoAI.Server.Extensions;
 /// <summary>
-/// Extension members pour ImageEntity utilisant les nouvelles fonctionnalités de C# 14
+/// Extension members pour ImageEntity
 /// </summary>
 public static class ImageEntityExtensions
 {
@@ -23,36 +23,6 @@ public static class ImageEntityExtensions
     extension(ImageEntity image)
     {
         /// <summary>
-        /// Vérifie si l'image a été modifiée récemment (dans les dernières 24 heures)
-        /// </summary>
-        public bool IsRecentlyModified => 
-            image.UpdatedAt.HasValue && (DateTime.UtcNow - image.UpdatedAt.Value).TotalHours < 24;
-
-        /// <summary>
-        /// Obtient la taille du fichier en format lisible (KB, MB)
-        /// </summary>
-        public string FormattedFileSize
-        {
-            get
-            {
-                const long KB = 1024;
-                const long MB = KB * 1024;
-
-                return image.FileSize switch
-                {
-                    < KB => $"{image.FileSize} B",
-                    < MB => $"{image.FileSize / (double)KB:F2} KB",
-                    _ => $"{image.FileSize / (double)MB:F2} MB"
-                };
-            }
-        }
-
-        /// <summary>
-        /// Obtient l'extension du fichier
-        /// </summary>
-        public string FileExtension => Path.GetExtension(image.FileName).TrimStart('.');
-
-        /// <summary>
         /// Vérifie si l'image appartient à un utilisateur spécifique
         /// </summary>
         public bool BelongsTo(string userId) => 
@@ -62,6 +32,16 @@ public static class ImageEntityExtensions
         /// Vérifie si la taille du fichier est valide
         /// </summary>
         public bool IsValidSize => image.FileSize > 0 && image.FileSize <= MaxFileSizeBytes;
+
+        /// <summary>
+        /// Vérifie si le type de contenu de l'image est valide
+        /// </summary>
+        public bool IsValidContentType => ImageEntity.IsSupportedContentType(image.ContentType);
+
+        /// <summary>
+        /// Vérifie si l'image est valide (taille et type de contenu)
+        /// </summary>
+        public bool IsValid => image.IsValidSize && image.IsValidContentType;
     }
 
     // Extension block pour les méthodes statiques

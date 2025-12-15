@@ -10,8 +10,6 @@ namespace BingoAI.Server.Controllers;
 
 /// <summary>
 /// Contrôleur API pour la gestion des images.
-/// Suit le principe de responsabilité unique (SRP) - gère uniquement les endpoints HTTP.
-/// Suit le principe d'inversion des dépendances (DIP) - dépend de IImageService.
 /// </summary>
 [Authorize]
 [ApiController]
